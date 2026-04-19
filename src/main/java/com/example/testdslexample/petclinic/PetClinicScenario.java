@@ -2,41 +2,39 @@ package com.example.testdslexample.petclinic;
 
 public class PetClinicScenario {
 
-    private final PetClinicService petClinicService;
     private final PetClinicTestDriver driver;
 
-    public PetClinicScenario(PetClinicService petClinicService, PetClinicTestDriver driver) {
-        this.petClinicService = petClinicService;
+    public PetClinicScenario(PetClinicTestDriver driver) {
         this.driver = driver;
     }
 
     public PetClinicScenario givenWaitingPet(String ownerName, String petName) {
-        petClinicService.checkInPet(ownerName, petName);
+        driver.checkInPet(ownerName, petName);
         return this;
     }
 
     public PetClinicScenario whenNextPetIsTreated() {
-        petClinicService.treatNextPet();
+        driver.treatNextPet();
         return this;
     }
 
     public PetClinicScenario thenWaitingListContains(int expectedCount) {
-        driver.assertWaitingPets(petClinicService.currentSnapshot(), expectedCount);
+        driver.assertWaitingPets(expectedCount);
         return this;
     }
 
     public PetClinicScenario thenTreatedListContains(int expectedCount) {
-        driver.assertTreatedPets(petClinicService.currentSnapshot(), expectedCount);
+        driver.assertTreatedPets(expectedCount);
         return this;
     }
 
     public PetClinicScenario thenLastTreatedPetIs(String ownerName, String petName) {
-        driver.assertLastTreatedPet(petClinicService.currentSnapshot(), new WaitingPet(ownerName, petName));
+        driver.assertLastTreatedPet(new WaitingPet(ownerName, petName));
         return this;
     }
 
     public PetClinicScenario thenNoPetWasTreated() {
-        driver.assertNoTreatedPet(petClinicService.currentSnapshot());
+        driver.assertNoTreatedPet();
         return this;
     }
 }

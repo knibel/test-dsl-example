@@ -22,7 +22,7 @@ class PetClinicDslTest {
 
     @Test
     void givenOneWaitingPetWhenTreatedThenDatasetIsUpdated() {
-        PetClinicScenario scenario = new PetClinicScenario(petClinicService, new JunitPetClinicDriver());
+        PetClinicScenario scenario = new PetClinicScenario(new JunitPetClinicDriver(petClinicService));
 
         scenario.givenWaitingPet("Alice", "Fido")
                 .whenNextPetIsTreated()
@@ -33,7 +33,7 @@ class PetClinicDslTest {
 
     @Test
     void givenEmptyWaitingListWhenTreatedThenNoDatasetChange() {
-        PetClinicScenario scenario = new PetClinicScenario(petClinicService, new JunitPetClinicDriver());
+        PetClinicScenario scenario = new PetClinicScenario(new JunitPetClinicDriver(petClinicService));
 
         scenario.whenNextPetIsTreated()
                 .thenWaitingListContains(0)
@@ -43,25 +43,41 @@ class PetClinicDslTest {
 
     private static final class JunitPetClinicDriver implements PetClinicTestDriver {
 
-        @Override
-        public void assertWaitingPets(ClinicSnapshot clinicSnapshot, int expectedCount) {
-            assertEquals(expectedCount, clinicSnapshot.waitingPets().size());
+        private final PetClinicService petClinicService;
+
+        private JunitPetClinicDriver(PetClinicService petClinicService) {
+            this.petClinicService = petClinicService;
         }
 
         @Override
-        public void assertTreatedPets(ClinicSnapshot clinicSnapshot, int expectedCount) {
-            assertEquals(expectedCount, clinicSnapshot.treatedPets().size());
+        public void checkInPet(String ownerName, String petName) {
+            petClinicService.checkInPet(ownerName, petName);
         }
 
         @Override
-        public void assertLastTreatedPet(ClinicSnapshot clinicSnapshot, WaitingPet expectedPet) {
-            assertEquals(expectedPet, clinicSnapshot.lastTreatedPet());
+        public void treatNextPet() {
+            petClinicService.treatNextPet();
         }
 
         @Override
-        public void assertNoTreatedPet(ClinicSnapshot clinicSnapshot) {
-            assertEquals(0, clinicSnapshot.treatedPets().size());
-            assertNull(clinicSnapshot.lastTreatedPet());
+        public void assertWaitingPets(int expectedCount) {
+            assertEquals(expectedCount, petClinicService.currentSnapshot().waitingPets().size());
+        }
+
+        @Override
+        public void assertTreatedPets(int expectedCount) {
+            assertEquals(expectedCount, petClinicService.currentSnapshot().treatedPets().size());
+        }
+
+        @Override
+        public void assertLastTreatedPet(WaitingPet expectedPet) {
+            assertEquals(expectedPet, petClinicService.currentSnapshot().lastTreatedPet());
+        }
+
+        @Override
+        public void assertNoTreatedPet() {
+            assertEquals(0, petClinicService.currentSnapshot().treatedPets().size());
+            assertNull(petClinicService.currentSnapshot().lastTreatedPet());
         }
     }
 }

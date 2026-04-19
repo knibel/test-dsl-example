@@ -34,33 +34,71 @@ class PetClinicControllerTest {
 
     @Test
     void checkInTreatAndInspectClinicOverHttp() {
-        ResponseEntity<Void> checkInResponse = restTemplate.postForEntity(
-                url("/api/pet-clinic/waiting-pets"),
-                new CheckInPetRequest("Alice", "Fido"),
-                Void.class
-        );
+        PetClinicScenario scenario = new PetClinicScenario(new HttpPetClinicDriver());
 
-        ResponseEntity<WaitingPet> treatResponse = restTemplate.postForEntity(
-                url("/api/pet-clinic/treat-next"),
-                null,
-                WaitingPet.class
-        );
-
-        ResponseEntity<ClinicSnapshot> snapshotResponse = restTemplate.getForEntity(
-                url("/api/pet-clinic"),
-                ClinicSnapshot.class
-        );
-
-        assertEquals(HttpStatus.ACCEPTED, checkInResponse.getStatusCode());
-        assertEquals(HttpStatus.OK, treatResponse.getStatusCode());
-        assertEquals(new WaitingPet("Alice", "Fido"), treatResponse.getBody());
-        assertEquals(HttpStatus.OK, snapshotResponse.getStatusCode());
-        assertEquals(0, snapshotResponse.getBody().waitingPets().size());
-        assertEquals(1, snapshotResponse.getBody().treatedPets().size());
-        assertEquals(new WaitingPet("Alice", "Fido"), snapshotResponse.getBody().lastTreatedPet());
+        scenario.givenWaitingPet("Alice", "Fido")
+                .whenNextPetIsTreated()
+                .thenWaitingListContains(0)
+                .thenTreatedListContains(1)
+                .thenLastTreatedPetIs("Alice", "Fido");
     }
 
     private String url(String path) {
         return "http://localhost:" + port + path;
+    }
+
+    private final class HttpPetClinicDriver implements PetClinicTestDriver {
+
+        @Override
+        public void checkInPet(String ownerName, String petName) {
+            ResponseEntity<Void> response = restTemplate.postForEntity(
+                    url("/api/pet-clinic/waiting-pets"),
+                    new CheckInPetRequest(ownerName, petName),
+                    Void.class
+            );
+
+            assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
+        }
+
+        @Override
+        public void treatNextPet() {
+            ResponseEntity<WaitingPet> response = restTemplate.postForEntity(
+                    url("/api/pet-clinic/treat-next"),
+                    null,
+                    WaitingPet.class
+            );
+
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+        }
+
+        @Override
+        public void assertWaitingPets(int expectedCount) {
+            assertEquals(expectedCount, snapshot().waitingPets().size());
+        }
+
+        @Override
+        public void assertTreatedPets(int expectedCount) {
+            assertEquals(expectedCount, snapshot().treatedPets().size());
+        }
+
+        @Override
+        public void assertLastTreatedPet(WaitingPet expectedPet) {
+            assertEquals(expectedPet, snapshot().lastTreatedPet());
+        }
+
+        @Override
+        public void assertNoTreatedPet() {
+            assertEquals(0, snapshot().treatedPets().size());
+        }
+
+        private ClinicSnapshot snapshot() {
+            ResponseEntity<ClinicSnapshot> response = restTemplate.getForEntity(
+                    url("/api/pet-clinic"),
+                    ClinicSnapshot.class
+            );
+
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            return response.getBody();
+        }
     }
 }

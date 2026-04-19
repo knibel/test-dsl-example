@@ -2,11 +2,15 @@ package com.example.testdslexample.petclinic;
 
 public interface PetClinicTestDriver {
 
-    void assertWaitingPets(ClinicSnapshot clinicSnapshot, int expectedCount);
+    void checkInPet(String ownerName, String petName);
 
-    void assertTreatedPets(ClinicSnapshot clinicSnapshot, int expectedCount);
+    void treatNextPet();
 
-    void assertLastTreatedPet(ClinicSnapshot clinicSnapshot, WaitingPet expectedPet);
+    void assertWaitingPets(int expectedCount);
 
-    void assertNoTreatedPet(ClinicSnapshot clinicSnapshot);
+    void assertTreatedPets(int expectedCount);
+
+    void assertLastTreatedPet(WaitingPet expectedPet);
+
+    void assertNoTreatedPet();
 }
