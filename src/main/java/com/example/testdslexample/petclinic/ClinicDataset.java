@@ -29,8 +29,16 @@ public class ClinicDataset {
         return waitingPets.size();
     }
 
+    public List<WaitingPet> waitingPets() {
+        return List.copyOf(waitingPets);
+    }
+
     public int treatedPetsCount() {
         return treatedPets.size();
+    }
+
+    public List<WaitingPet> treatedPets() {
+        return List.copyOf(treatedPets);
     }
 
     public Optional<WaitingPet> lastTreatedPet() {
@@ -39,5 +47,10 @@ public class ClinicDataset {
         }
 
         return Optional.of(treatedPets.get(treatedPets.size() - 1));
+    }
+
+    public void clear() {
+        waitingPets.clear();
+        treatedPets.clear();
     }
 }
