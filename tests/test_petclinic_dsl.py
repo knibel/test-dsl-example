@@ -1,6 +1,6 @@
 import unittest
 
-from petclinic.domain import ClinicDataset
+from petclinic.domain import ClinicDataset, WaitingPet
 from petclinic.testdsl import PetClinicScenario, PetClinicTestDriver
 
 
@@ -14,7 +14,7 @@ class UnittestPetClinicDriver(PetClinicTestDriver):
     def assert_treated_pets(self, dataset: ClinicDataset, expected_count: int) -> None:
         self.test_case.assertEqual(expected_count, len(dataset.treated_pets))
 
-    def assert_last_treated_pet(self, dataset: ClinicDataset, expected) -> None:
+    def assert_last_treated_pet(self, dataset: ClinicDataset, expected: WaitingPet | None) -> None:
         if expected is None:
             self.test_case.assertEqual([], dataset.treated_pets)
             return
