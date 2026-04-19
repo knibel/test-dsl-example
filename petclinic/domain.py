@@ -1,3 +1,4 @@
+from collections import deque
 from dataclasses import dataclass
 
 
@@ -9,7 +10,7 @@ class WaitingPet:
 
 class ClinicDataset:
     def __init__(self) -> None:
-        self.waiting_pets: list[WaitingPet] = []
+        self.waiting_pets: deque[WaitingPet] = deque()
         self.treated_pets: list[WaitingPet] = []
 
     def add_waiting_pet(self, owner_name: str, pet_name: str) -> None:
@@ -18,7 +19,6 @@ class ClinicDataset:
     def treat_next_waiting_pet(self) -> WaitingPet | None:
         if not self.waiting_pets:
             return None
-        treated_pet = self.waiting_pets.pop(0)
+        treated_pet = self.waiting_pets.popleft()
         self.treated_pets.append(treated_pet)
         return treated_pet
-
