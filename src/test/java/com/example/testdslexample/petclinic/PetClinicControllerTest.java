@@ -1,6 +1,7 @@
 package com.example.testdslexample.petclinic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.example.testdslexample.TestDslExampleApplication;
 import org.junit.jupiter.api.BeforeEach;
@@ -89,6 +90,7 @@ class PetClinicControllerTest {
         @Override
         public void assertNoTreatedPet() {
             assertEquals(0, snapshot().treatedPets().size());
+            assertNull(snapshot().lastTreatedPet());
         }
 
         private ClinicSnapshot snapshot() {
